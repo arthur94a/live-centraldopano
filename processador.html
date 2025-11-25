@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processador de Vendas da Live - Central do Pano</title>
+    <!-- Incluindo Tailwind CSS para um design moderno e responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuração customizada do Tailwind para incluir o tom "pano-pink" da logo
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pano-pink': {
+                            // Definindo uma paleta de rosas baseada na logo
+                            50: '#FDECF4',   // Mais claro para fundos
+                            100: '#F8E1EE',
+                            300: '#F4BBDA',
+                            500: '#E91E63',   // Rosa base
+                            700: '#C2185B',   // Rosa forte para texto e botões
+                            800: '#A0003A',   // Para hover
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Definindo a fonte Inter, moderna e limpa */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* light blue-50 */
+        }
+        /* Estilo para focar o conteúdo no centro */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        /* Estilo para a logo */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .logo {
+            max-height: 80px; /* Altura máxima para a logo */
+            width: auto; /* Mantém a proporção */
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+    <div class="container bg-white shadow-xl rounded-2xl p-6 md:p-10 border border-pano-pink-100">
+        <header class="text-center mb-8">
+            <!-- Container para a logo -->
+            <div class="logo-container">
+                <!-- A URL anterior (i.ibb.co) falhou. Substituímos por um placeholder robusto com fallback. -->
+                <img 
+                    src="https://placehold.co/300x80/E91E63/ffffff?text=Central+do+Pano" 
+                    onerror="this.onerror=null; this.src='https://placehold.co/300x80/000000/ffffff?text=Logo+Indisponível'"
+                    alt="Logo Central do Pano" 
+                    class="logo"
+                >
+            </div>
+            <!-- Cor do título principal alterada para o rosa escuro -->
+            <h1 class="text-3xl font-bold text-pano-pink-800">Organizador de Vendas da Live</h1>
+            <p class="text-gray-500 mt-2">Cole os comentários da sua live, filtre pelo código de produto e prepare sua lista de vendas.</p>
+        </header>
+
+        <main class="space-y-8">
+            <!-- Passo 1: Inserir Comentários - Cor de fundo alterada para rosa claro -->
+            <section class="p-6 bg-pano-pink-50 rounded-xl shadow-inner">
+                <!-- Cor do título alterada para rosa escuro -->
+                <h2 class="text-xl font-semibold text-pano-pink-700 mb-3">1. Cole os Comentários Brutos</h2>
+                <p class="text-sm text-gray-600 mb-4">Copie o bloco completo de comentários do seu Instagram e cole aqui.</p>
+                <!-- Bordas e foco alterados para rosa -->
+                <textarea 
+                    id="commentsInput" 
+                    rows="8" 
+                    class="w-full p-3 border-2 border-pano-pink-300 rounded-lg focus:ring-pano-pink-500 focus:border-pano-pink-500 transition duration-150"
+                    placeholder="Exemplo:\nmariafragosso M3 70cm\nnara.rsrodrigues M3 80cm\nyasminm.only M3 1m"
+                >mariafragosso M3 70cm
+nara.rsrodrigues M3 80cm
+yasminm.only M3 1m
+juniorcintravet Sou seu fã
+ramesh_rajbhar_123 M3 50cm
+edsonsousadea M3
+gui.5639.ofc @black_tatto_ink 👍👍👍👍👍👍
+madasgracas19 😘❤️😘❤️😘❤️😘❤️😂❤️😘❤️😘❤️😘❤️😂❤️😘❤️😘❤️😘👏</textarea>
+            </section>
+
+            <!-- Passo 2: Código do Produto -->
+            <section class="p-6 bg-white rounded-xl shadow">
+                <h2 class="text-xl font-semibold text-gray-700 mb-3">2. Insira o Código de Filtro</h2>
+                <p class="text-sm text-gray-600 mb-4">Qual código você quer identificar nos comentários? (Ex: M3, P10, etc.)</p>
+                <!-- Foco alterado para verde para manter contraste com o botão principal -->
+                <input 
+                    type="text" 
+                    id="codeInput" 
+                    value="M3" 
+                    class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 font-bold text-lg uppercase transition duration-150"
+                    placeholder="M3"
+                >
+            </section>
+
+            <!-- Passo 3: Processar - Mantido em verde para alto contraste -->
+            <button 
+                onclick="processComments()" 
+                class="w-full bg-green-500 hover:bg-green-600 text-white font-extrabold text-lg py-3 rounded-xl transition duration-150 shadow-lg hover:shadow-xl transform hover:scale-[1.01]"
+            >
+                PROCESSAR COMENTÁRIOS E GERAR LISTA
+            </button>
+
+            <!-- Passo 4: Resultados -->
+            <section id="resultsOutput" class="pt-4">
+                <!-- Resultados aparecerão aqui -->
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Função que lida com a cópia para a área de transferência, otimizada para iFrames
+        function copyToClipboard() {
+            const textarea = document.getElementById('outputTextArea');
+            textarea.select();
+            try {
+                // Comando de cópia antigo, mas mais confiável em ambientes restritos (como iFrames)
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    // Feedback visual
+                    const button = document.querySelector('button[onclick="copyToClipboard()"]');
+                    const originalText = button.textContent;
+                    button.textContent = 'Copiado! 🎉 Agora é só colar na planilha.';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                    }, 3000);
+                }
+            } catch (err) {
+                console.error('Falha ao copiar:', err);
+                // Feedback de erro
+                const button = document.querySelector('button[onclick="copyToClipboard()"]');
+                button.textContent = 'Erro ao Copiar. Tente selecionar e copiar manualmente.';
+                button.classList.remove('bg-pano-pink-700'); // Alterado de indigo-600
+                button.classList.add('bg-red-500');
+                setTimeout(() => {
+                    button.textContent = 'Copiar Lista';
+                    button.classList.remove('bg-red-500');
+                    button.classList.add('bg-pano-pink-700'); // Alterado para o novo rosa
+                }, 5000);
+            }
+        }
+
+        // Função principal para processar os comentários
+        function processComments() {
+            const commentsText = document.getElementById('commentsInput').value;
+            const productCode = document.getElementById('codeInput').value.trim();
+            const outputDiv = document.getElementById('resultsOutput');
+            const results = [];
+
+            if (!productCode) {
+                outputDiv.innerHTML = '<div class="p-4 bg-red-100 text-red-800 border border-red-300 rounded-lg shadow-md">⚠️ Por favor, insira um código de produto (Passo 2) para filtrar os comentários.</div>';
+                return;
+            }
+
+            // Divide o bloco de texto em linhas (comentários individuais)
+            const lines = commentsText.split('\n');
+
+            // Cria uma expressão regular para encontrar o código exatamente como uma "palavra" (boundary \b), ignorando maiúsculas/minúsculas (i)
+            const codeRegex = new RegExp(`\\b${productCode}\\b`, 'i');
+            
+            // Expressão regular para encontrar a quantidade (número seguido opcionalmente por 'cm', 'm', ou 'metros')
+            // O padrão busca: [Número] [opcionalmente um espaço] [opcionalmente 'cm', 'm', 'metros', 'un' ou 'unidade']
+            const quantityPattern = /(\d+(\.\d+)?)\s*(cm|m|metros|un|unidade)?/i;
+
+
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (trimmedLine.length === 0) return;
+
+                // 1. Verifica se o código de produto está na linha
+                if (codeRegex.test(trimmedLine)) {
+                    // 2. Extrai o nome de usuário (que é o primeiro token antes do primeiro espaço)
+                    const parts = trimmedLine.split(/\s+/).filter(p => p.length > 0);
+                    
+                    if (parts.length > 0) {
+                        const username = parts[0]; // O primeiro item é o nome de usuário
+                        let quantity = '';
+                        
+                        // 3. Tenta extrair a quantidade
+                        
+                        // Localiza o índice do código na linha para iniciar a busca da quantidade
+                        const codeIndex = trimmedLine.toLowerCase().indexOf(productCode.toLowerCase());
+                        
+                        // Pega a parte da string que começa logo após o código (para buscar a quantidade)
+                        if (codeIndex !== -1) {
+                            const remainingText = trimmedLine.substring(codeIndex + productCode.length).trim();
+                            
+                            // Aplica o Regex de quantidade no texto restante
+                            const quantityMatch = remainingText.match(quantityPattern);
+                            
+                            if (quantityMatch) {
+                                // O texto da quantidade completa (ex: "70cm", "1m") está no índice 0
+                                quantity = quantityMatch[0].trim();
+                            }
+                        }
+
+                        // Se a quantidade estiver vazia, verifica se o código era o único item após o username (assume 1 unidade)
+                        // Exceto se a linha for EXATAMENTE "username code" e não houver mais nada.
+                        if (quantity === '') {
+                             // Se a linha for do tipo "username M3" e não houver mais nada, não podemos garantir a unidade.
+                             // Vou priorizar deixar vazio para que o usuário revise manualmente, a menos que ele digite '1'
+                             // Neste caso, se a linha for 'edsonsousadea M3', a quantidade é vazia.
+                             // Se você quiser que o padrão seja '1 un' se não for especificado, mude a linha abaixo.
+                             // Exemplo: quantity = '1 un'; 
+                        }
+
+
+                        // AQUI ESTÁ A MUDANÇA: Usando \t (Tabulação) como separador
+                        // Adiciona o resultado no formato TSV: username\tCODE\tQUANTITY
+                        results.push(`${username}\t${productCode.toUpperCase()}\t${quantity}`);
+                    }
+                }
+            });
+
+            // Exibe os resultados
+            if (results.length === 0) {
+                outputDiv.innerHTML = `
+                    <div class="p-4 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-lg shadow-md">
+                        Nenhuma venda encontrada para o código <strong>"${productCode.toUpperCase()}"</strong> nos comentários fornecidos.
+                    </div>
+                `;
+            } else {
+                const outputText = results.join('\n');
+                outputDiv.innerHTML = `
+                    <div class="space-y-4 p-6 bg-white rounded-xl shadow-lg border border-green-200">
+                        <p class="text-sm text-gray-600">
+                            <!-- Cor do texto de sucesso alterada para rosa -->
+                            <span class="font-bold text-pano-pink-700 text-lg">${results.length} Vendas encontradas!</span> A lista abaixo já está formatada para ser colada diretamente em colunas separadas (A, B e C) na sua planilha (separada por Tabulação).
+                        </p>
+                        <!-- Bordas e fundo da área de texto de saída alterados para rosa -->
+                        <textarea 
+                            id="outputTextArea" 
+                            readonly 
+                            class="w-full h-40 p-3 text-sm font-mono border-2 border-pano-pink-500 bg-pano-pink-50 rounded-lg resize-none shadow-inner"
+                        >${outputText}</textarea>
+                        <!-- Cor do botão "Copiar Lista" alterada para rosa -->
+                        <button 
+                            onclick="copyToClipboard()" 
+                            class="w-full bg-pano-pink-700 hover:bg-pano-pink-800 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md"
+                        >
+                            Copiar Lista
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
